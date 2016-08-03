@@ -1,0 +1,77 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutPublic.cshtml"; ;
+}
+
+
+<span class="col-md-1">
+    <label for="searchFilter" style="float:right;"><b>Enter School Id:</b></label>
+</span>
+<span class="col-md-2">
+    <input type="text"
+           name="xxx"
+           id="xxx"
+           class="form-control"
+           placeholder="Your 8 character school id"
+           ng-model="searchText">
+</span>
+
+<span class="col-md-1">
+    <label for="searchFilter" style="float:right;"><b>Enter Student Id:</b></label>
+</span>
+<span class="col-md-2">
+    <input type="text"
+           name="studentId"
+           id="studentId"
+           class="form-control"
+           placeholder="Your 8 character student id"
+           ng-model="searchText">
+</span>
+
+
+
+
+
+
+
+
+
+@section Scripts {
+    @*<script src="~/Scripts/core/base.controller.js"></script>
+        <script src="~/Scripts/core/base.service.js"></script>*@
+    <script src="~/Scripts/services.users.js">        //the service object is in here</script>
+    <script src="~/Scripts/services.gradebook.js"></script>
+    <script type="text/javascript">
+        var APPNAME = 'GradeInkApp';
+
+        var myApp = angular.module(APPNAME, []);
+
+        myApp.controller('userProfileController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+
+
+
+        }])
+
+        myApp.filter('assignmentTypeFilter', [function () {
+            return function (assignmentTypeId) {
+                switch (assignmentTypeId) {
+                    case 1:
+                        return "Homework";
+                    case 2:
+                        return "Quiz";
+                    case 3:
+                        return "Test";
+                    case 4:
+                        return "Project";
+                    case 5:
+                        return "Extra Credit";
+                }
+            }
+        }])
+
+
+</script>
+}

@@ -1,0 +1,559 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@Styles.Render("~/Content/own.css")
+
+<div data-ng-app="GradeInkApp" class="col-md-10 ng-cloak">
+    <div ng-controller="tabController as tabCtrl">
+
+        <ul class="nav nav-tabs">
+            <li ng-class="tabCtrl.tabClass(tab)" ng-repeat="tab in tabCtrl.tabs">
+                <a href="{{tab.link}}" ng-click="tabCtrl.setSelectedTab(tab)">{{tab.label}}</a>
+            </li>
+        </ul>
+        <div ng-view></div>
+
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts {
+    @*<script src="~/Scripts/core/base.controller.js"></script>
+        <script src="~/Scripts/core/base.service.js"></script>*@
+    <script src="~/Scripts/services.users.js"></script>
+    <script src="~/Scripts/angular-route.js"></script>
+    <script src="~/Scripts/services.gradebook.js"></script>
+    <script type="text/javascript">
+        var APPNAME = 'GradeInkApp';
+        var profileId = null;
+        var profileFullName = null;
+
+        var myApp = angular.module(APPNAME, ['ngRoute']);
+
+        myApp.config(["$routeProvider", function ($routeProvider) {
+
+            $routeProvider.when('/', {
+                templateUrl: '/ClientSideRouting/AllUsers',
+                controller: 'userListController',
+                controllerAs: 'usrListCtrl'
+            }).when('/Add', {
+                templateUrl: '/clientSideRouting/addusers',
+                controller: 'mainController',
+                controllerAs: 'main'
+            }).when('/UserProfile', {
+                templateUrl: '/clientSideRouting/userprofile/',
+                controller: 'userProfileController',
+                controllerAs: 'usrProfileCtrl'
+            });
+
+        }])
+
+
+        myApp.controller('tabController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+
+
+            vm.tabs = [
+
+                  { link: '#/', label: 'View All Users' },
+                  { link: '#/Add', label: 'Add User' },
+                    { link: '#/UserProfile/', label: 'User Profile'}
+            ];
+
+            vm.selectedTab = vm.tabs[0];
+            vm.tabClass = _tabClass;
+            vm.setSelectedTab = _setSelectedTab;
+
+            function _tabClass(tab) {
+                if (vm.selectedTab == tab) {
+                    return "active";
+                } else {
+                    return "";
+                }
+            }
+
+            function _setSelectedTab(tab) {
+
+                vm.selectedTab = tab;
+            }
+
+        }
+        ])
+
+        myApp.controller('mainController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+            vm.student = {};
+            vm.editInfo = {};
+            vm.isAddButtonClicked = false;
+            vm.isEditButtonClicked = false;
+            
+
+
+            vm.userForm = null;
+            vm.editUserForm = null;
+            vm.addUser = _addUser;
+            vm.addUserSuccess = _addUserSuccess;
+            vm.addUserError = _addUserError;
+            vm.getUsersByPeriodSuccess = _getUsersByPeriodSuccess;
+            vm.getUsersByPeriodError = _getUsersByPeriodError;
+            vm.deleteUser = _deleteUser;
+            vm.deleteUserSuccess = _deleteUserSuccess;
+            vm.deleteUserError = _deleteUserError;
+            vm.viewUserProfile = _viewUserProfile;
+            vm.getUserEditInfo = _getUserEditInfo;
+            vm.getUserEditInfoSuccess = _getUserEditInfoSuccess;
+            vm.getUserEditInfoError = _getUserEditInfoError;
+            vm.editUserInfo = _editUserInfo;
+            vm.editUserInfoSuccess = _editUserInfoSuccess;
+            vm.editUserInfoError = _editUserInfoError;
+            vm.currentPeriod = null;
+            vm.mostRecentAddedUser = null;
+            vm.listOfUsersInPeriod = [];
+
+
+            function _addUser(studentObj) {
+                vm.isAddButtonClicked = true;
+                if (vm.userForm.$valid) {
+                    services.users.add(studentObj, vm.addUserSuccess, vm.addUserError);
+                }
+            }
+
+            function _addUserSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.currentPeriod = vm.student.period;
+                    vm.mostRecentAddedUser = data.Item;
+                    vm.student = {};
+                    vm.isAddButtonClicked = false;
+                });
+
+                if (vm.currentPeriod == null) {
+                    vm.currentPeriod = 0;
+                }
+                services.users.getUsersByPeriod(vm.currentPeriod, vm.getUsersByPeriodSuccess, vm.getUsersByPeriodError);
+
+                console.log(data);
+            }
+
+            function _addUserError() {
+                console.log("did not add user");
+            }
+
+            function _getUsersByPeriodSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.listOfUsersInPeriod = data.Items;
+                })
+            }
+
+            function _getUsersByPeriodError() {
+                console.log("could not get list of users by period.");
+            }
+
+            function _deleteUser(id) {
+                if (confirm('Are you sure you want to delete user ' + id + '?')) {
+                    services.users.deleteUser(id, vm.deleteUserSuccess, vm.deleteUserError);
+                }
+                else {
+                    return;
+                }
+            }
+
+            function _deleteUserSuccess() {
+                services.users.getUsersByPeriod(vm.currentPeriod, vm.getUsersByPeriodSuccess, vm.getUsersByPeriodError);
+            }
+
+            function _deleteUserError() {
+                console.log("delete user error detected.");
+            }
+
+            function _viewUserProfile(id) {
+                    profileId = id;                              
+            }
+
+            function _getUserEditInfo(id) {
+                services.users.getUserById(id, vm.getUserEditInfoSuccess, vm.getUserEditInfoError);
+            }
+
+
+            function _getUserEditInfoSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.editInfo.firstName = data.Item.FirstName;
+                    vm.editInfo.lastName = data.Item.LastName;
+                    vm.editInfo.period = data.Item.Period;
+                    vm.editInfo.userType = data.Item.UserType;
+                    vm.editInfo.email = data.Item.Email;
+                    vm.editInfo.id = data.Item.Id;
+                });
+                //console.log(vm.editInfo);
+            }
+
+            function _getUserEditInfoError() {
+                console.log("could not get user info for edit.");
+            }
+
+            function _editUserInfo(id, editInfo) {
+                vm.isEditButtonClicked = true;
+                if (vm.editUserForm.$valid) {
+                    services.users.edit(id, editInfo, vm.editUserInfoSuccess, vm.editUserInfoError);
+                }
+
+                else {
+                    console.log("invalid edit form input.");
+                }
+            }
+
+            function _editUserInfoSuccess() {
+                //will refactor
+
+                vm.$scope.$apply(function () {
+                    vm.mostRecentAddedUser = vm.editInfo.id;
+                    vm.currentPeriod = vm.editInfo.period;
+                })
+
+                services.users.getUsersByPeriod(vm.currentPeriod, vm.getUsersByPeriodSuccess, vm.getUsersByPeriodError);
+            }
+
+            function _editUserInfoError() {
+                console.log('edit failed.');
+            }
+
+
+        }]);
+
+        myApp.filter('userTypeFilter', [function () {
+            return function (userTypeId) {
+                switch (userTypeId) {
+                    case 1:
+                        return "Master Admin";
+                    case 2:
+                        return "Admin";
+                    case 3:
+                        return "Student";
+                    case 4:
+                        return "TA"
+                }
+            }
+        }]);
+
+        myApp.controller('userProfileController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+            vm.userInfo = null;
+            vm.user = {};
+            vm.userGrades = null;
+            vm.HWPointsEarned = null;
+            vm.HWTotalPoints = null;
+            vm.HWPercentage = null;
+            vm.quizPointsEarned = null;
+            vm.quizPointsTotal = null;
+            vm.quizPercentage = null;
+            vm.testPointsEarned = null;
+            vm.testPointsTotal = null;
+            vm.testPercentage = null;
+            vm.overallEarnedPoints = null;
+            vm.overallTotalPoints = null;
+            vm.overallPercentage = null;
+
+            vm.getUserById = _getUserById;
+            vm.onGetUserByIdSuccess = _onGetUserByIdSuccess;
+            vm.onGetUserByIdError = _onGetUserByIdError;
+            vm.onGetGradesSuccess = _onGetGradesSuccess;
+            vm.onGetGradesError = _onGetGradesError;
+            vm.deleteGradebookEntry = _deleteGradebookEntry;
+            vm.onDeleteSuccess = _onDeleteSuccess;
+            vm.onDeleteError = _onDeleteError;
+            vm.getUserHWPercentage = _getUserHWPercentage;
+            vm.onGetUserHWPercentageSuccess = _onGetUserHWPercentageSuccess;
+            vm.onGetUserHWPercentageError = _onGetUserHWPercentageError;
+            vm.getUserQuizPercentage = _getUserQuizPercentage;
+            vm.onGetUserQuizPercentageSuccess = _onGetUserQuizPercentageSuccess;
+            vm.onGetUserQuizPercentageError = _onGetUserQuizPercentageError;
+            vm.getUserTestPercentage = _getUserTestPercentage;
+            vm.onGetUserTestPercentageSuccess = _onGetUserTestPercentageSuccess;
+            vm.onGetUserTestPercentageError = _onGetUserTestPercentageError;
+            vm.getUserOverallPercentage = _getUserOverallPercentage;
+            vm.onGetUserOverallPercentageSuccess = _onGetUserOverallPercentageSuccess;
+            vm.onGetUserOverallPercentageError = _onGetUserOverallPercentageError;
+
+
+
+
+
+            //on render
+            render();
+
+
+            function render() {
+                vm.getUserById(profileId);
+            }
+
+            function _getUserById(id) {
+                if (id != null) {
+                    services.users.getUserById(id, vm.onGetUserByIdSuccess, vm.onGetUserByIdError);
+                }
+            }
+
+            function _onGetUserByIdSuccess(data){
+                vm.$scope.$apply(function(){
+                    vm.userInfo = data.Item;
+                    vm.user.userId = data.Item.UserId;
+                });
+
+                vm.getUserHWPercentage(vm.user.userId);
+                vm.getUserQuizPercentage(vm.user.userId);
+                vm.getUserTestPercentage(vm.user.userId);
+                vm.getUserOverallPercentage(vm.user.userId);
+                services.gradebook.getUserGradesByUserId(vm.user, vm.onGetGradesSuccess, vm.onGetGradesSuccess);
+                services.gradebook.getUserGradesByUserId(vm.user, vm.onGetGradesSuccess, vm.onGetGradesSuccess);
+                console.log(data);
+            }
+
+            function _onGetUserByIdError(){
+                console.log("error when getting user info by Id.");
+            }
+
+            function _onGetGradesSuccess(data){
+                vm.$scope.$apply(vm.userGrades = data.Items);
+                console.log(data);
+            }
+
+            function _onGetGradesError(){
+                console.log("Error when trying to get student's grades.");
+            }
+
+            function _deleteGradebookEntry(id){
+                if (confirm('Are you sure you want to delete assignment entry ' + id + ' ?')) {
+                    services.gradebook.deleteGradebookEntry(id, vm.onDeleteSuccess, vm.onDeleteError);
+                }
+                else {
+                    return;
+                }
+            }
+
+            function _onDeleteSuccess(){
+                services.gradebook.getUserGradesByUserId(vm.user, vm.onGetGradesSuccess, vm.onGetGradesError);
+                console.log("gradebook entry deleted.");
+            }
+
+            function _onDeleteError(){
+                console.log("could not delete gradebook entry.");
+            }
+
+            function _getUserHWPercentage(userId) {
+                services.gradebook.getUserHWPercentage(userId, vm.onGetUserHWPercentageSuccess, vm.onGetUserHWPercentageError)
+            }
+
+            function _onGetUserHWPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.HWPointsEarned = data.Item.PointsEarned;
+                    vm.HWTotalPoints = data.Item.TotalPoints;
+                    vm.HWPercentage = data.Item.Percentage;
+                });
+            }
+
+            function _onGetUserHWPercentageError() {
+                console.log("Error when getting hw scores.");
+            }
+
+            function _getUserQuizPercentage(userId) {
+                services.gradebook.getUserQuizPercentage(userId, vm.onGetUserQuizPercentageSuccess, vm.onGetUserQuizPercentageError)
+            }
+
+            function _onGetUserQuizPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.quizPointsEarned = data.Item.PointsEarned;
+                    vm.quizTotalPoints = data.Item.TotalPoints;
+                    vm.quizPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserQuizPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+            function _getUserTestPercentage(userId) {
+                services.gradebook.getUserTestPercentage(userId, vm.onGetUserTestPercentageSuccess, vm.onGetUserTestPercentageError)
+            }
+
+            function _onGetUserTestPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.testPointsEarned = data.Item.PointsEarned;
+                    vm.testTotalPoints = data.Item.TotalPoints;
+                    vm.testPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserTestPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+            function _getUserOverallPercentage(userId) {
+                services.gradebook.getUserOverallPercentage(userId, vm.onGetUserOverallPercentageSuccess, vm.onGetUserOverallPercentageError)
+            }
+
+            function _onGetUserOverallPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.overallPointsEarned = data.Item.PointsEarned;
+                    vm.overallTotalPoints = data.Item.TotalPoints;
+                    vm.overallPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserOverallPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+
+        }]);
+
+        myApp.filter('assignmentTypeFilter', [function () {
+            return function (assignmentTypeId) {
+                switch (assignmentTypeId) {
+                    case 1:
+                        return "Homework";
+                    case 2:
+                        return "Quiz";
+                    case 3:
+                        return "Test";
+                    case 4:
+                        return "Project";
+                    case 5:
+                        return "Extra Credit";
+                }
+            }
+        }]);
+
+        myApp.controller('userListController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+            vm.editInfo = {};
+            vm.allUsersArr = null;
+            vm.editUserForm = null;
+
+
+            vm.onGetAllUsersSuccess = _onGetAllUsersSuccess;
+            vm.onGetAllUsersError = _onGetAllUsersError;
+            vm.editUserInfo = _editUserInfo;
+            vm.editUserInfoSuccess = _editUserInfoSuccess;
+            vm.editUserInfoError = _editUserInfoError;
+            vm.viewUserProfile = _viewUserProfile;
+            vm.getUserEditInfo = _getUserEditInfo;
+            vm.getUserEditInfoSuccess = _getUserEditInfoSuccess;
+            vm.getUserEditInfoError = _getUserEditInfoError;
+            vm.deleteUser = _deleteUser;
+            vm.deleteUserSuccess = _deleteUserSuccess;
+            vm.deleteUserError = _deleteUserError;
+            vm.isEditButtonClicked = false;
+            vm.mostRecentAddedUser = null;
+            
+
+            vm.classListArr = [{ key: "Period 1", value: 1 },
+            { key: "Period 2", value: 2 },
+            { key: "Period 3", value: 3 },
+            { key: "Period 4", value: 4 },
+            { key: "Period 5", value: 5 },
+            { key: "Period 6", value: 6 },
+            { key: "Period 7", value: 7 },
+            { key: "Period 8", value: 8 },
+            { key: "MISC", value: 0 },
+            { key: "All", value: '' }];
+
+
+
+            render();
+
+            function render() {
+                services.users.getAllUsers(vm.onGetAllUsersSuccess, vm.onGetAllUsersError);
+            }
+
+            function _onGetAllUsersSuccess(data) {
+                vm.$scope.$apply(vm.allUsersArr = data.Items);
+            }
+
+            function _onGetAllUsersError() {
+                console.log("failed to get all users.");
+            }
+
+            function _editUserInfo(id, editInfo) {
+                vm.isEditButtonClicked = true;
+                if (vm.editUserForm.$valid) {
+                    services.users.edit(id, editInfo, vm.editUserInfoSuccess, vm.editUserInfoError);
+                }
+
+                else {
+                    console.log("invalid edit form input.");
+                }
+            }
+
+            function _editUserInfoSuccess() {
+                vm.$scope.$apply(function () {
+                    vm.mostRecentAddedUser = vm.editInfo.id;
+                })
+
+                services.users.getAllUsers(vm.onGetAllUsersSuccess, vm.onGetAllUsersError);
+            }
+
+            function _editUserInfoError() {
+                console.log('edit failed.');
+            }
+
+            function _viewUserProfile(id) {
+                profileId = id;
+            }
+
+            function _getUserEditInfo(id) {
+                services.users.getUserById(id, vm.getUserEditInfoSuccess, vm.getUserEditInfoError);
+            }
+
+            function _getUserEditInfoSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.editInfo.firstName = data.Item.FirstName;
+                    vm.editInfo.lastName = data.Item.LastName;
+                    vm.editInfo.period = data.Item.Period;
+                    vm.editInfo.userType = data.Item.UserType;
+                    vm.editInfo.email = data.Item.Email;
+                    vm.editInfo.id = data.Item.Id;
+                });
+                //console.log(vm.editInfo);
+            }
+
+            function _getUserEditInfoError() {
+                console.log("could not get user info for edit.");
+            }
+
+            function _deleteUser(id) {
+                if (confirm('Are you sure you want to delete user ' + id + '?')) {
+                    services.users.deleteUser(id, vm.deleteUserSuccess, vm.deleteUserError);
+                }
+                else {
+                    return;
+                }
+            }
+
+            function _deleteUserSuccess() {
+                services.users.getAllUsers(vm.onGetAllUsersSuccess, vm.onGetAllUsersError);
+            }
+
+            function _deleteUserError() {
+                console.log("delete user error detected.");
+            }
+
+            
+
+        }]);
+
+    </script>
+
+}

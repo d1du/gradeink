@@ -1,0 +1,146 @@
+﻿@model Derek.Web.Models.ViewModels.ItemViewModel<int?>
+
+<h1><i class="glyphicon glyphicon-user"></i> &nbsp User Profile</h1>
+<div class="row">
+    <div class="col-md-6">
+        <div class="content-box-large">
+            <div class="panel-heading">
+                <div class="panel-title"> <b>{{usrProfileCtrl.userInfo.FirstName}} {{usrProfileCtrl.userInfo.LastName}} </b></div>
+                <div class="panel-options">
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-5">
+                    <div class="img-thumbnail">
+                        <div class="uploadPhotoBox">
+                            <img ng-src="http://www.vacul.org/extension/site/design/site//images/anonymous-user.png" style='width: auto; height: 175px;' />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div><font size="3"><b>Id: </b> &nbsp{{usrProfileCtrl.userInfo.Id}}</font></div>
+                    <br />
+                    <div><font size="3"><b>User Id: </b> &nbsp{{usrProfileCtrl.userInfo.UserId}}</font></div>
+                    <br />
+                    <div><font size="3"><b>User Type: </b> &nbsp{{usrProfileCtrl.userInfo.UserType | userTypeFilter}}</font></div>
+                    <br />
+                    <div><font size="3"><b>Period: </b> &nbsp{{usrProfileCtrl.userInfo.Period == 0? 'MISC.' : usrProfileCtrl.userInfo.Period}}</font></div>
+                    <br />
+                    <div><font size="3"><b>Email: </b> &nbsp{{usrProfileCtrl.userInfo.Email? usrProfileCtrl.userInfo.Email : "none"}}</font></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!---->
+
+    <div class="col-md-5">
+        <div class="row">
+            <div class="col-md-12 panel-primary">
+                <div class="content-box-header panel-heading">
+                    <div class="panel-title"><b>Student Performance </b></div>
+                    <div class="panel-options">
+                    </div>
+                </div>
+                <div class="content-box-large box-with-header">
+
+                    <p><b>Homework Percentage: &nbsp&nbsp {{usrProfileCtrl.HWPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.HWPointsEarned}}/{{usrProfileCtrl.HWTotalPoints}})</b></p>
+                    <p><b>Quiz Percentage: &nbsp&nbsp {{usrProfileCtrl.quizPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.quizPointsEarned}}/{{usrProfileCtrl.quizTotalPoints}})</b></p>
+
+                    <p><b>Test Percentage: &nbsp&nbsp {{usrProfileCtrl.testPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.testPointsEarned}}/{{usrProfileCtrl.testTotalPoints}})</b> </p>
+                    <p><b>Overall Percentage: &nbsp&nbsp {{usrProfileCtrl.overallPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.overallPointsEarned}}/{{usrProfileCtrl.overallTotalPoints}})</b> </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="content-box-header panel-heading">
+                    <div class="panel-title"><b>Filter Assignments Through Keywords </b></div>
+                    <div class="panel-options">
+                    </div>
+                </div>
+                <div class="content-box-large box-with-header">
+                    <input type="text" id="filterAssignments" class="form-control" ng-model="searchText" placeholder="A Tale of Two Cities" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!---->
+<div class="row">
+    <div class="col-md-11 panel-success">
+        <div class="content-box-header panel-heading">
+            <div class="panel-title"><b>Gradebook for {{usrProfileCtrl.userInfo.FirstName}} {{usrProfileCtrl.userInfo.LastName}}</b></div>
+            <div class="panel-options">
+            </div>
+        </div>
+        <div class="content-box-large box-with-header">
+            <!---->
+
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered dataTable" id="userGradeTable" aria-describedby="example_info">
+                <thead>
+                    <tr role="row">
+                        <th class="sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending" style="width: 100px;">
+                            <font size="2">Assignment #</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 260px;">
+                            <font size="2">Assignment Name</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 100px;">
+                            <font size="2">Type</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 100px;">
+                            <font size="2">Date Added</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 60px;">
+                            <font size="2">Score</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 60px;">
+                            <font size="2">Total</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="CSS grade: activate to sort column ascending" style="width: 260px;">
+                            <font size="2">Instructor Comments</font>
+                        </th>
+                        <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 203px;">
+                            <font size="2">Modify</font>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody role="alert" aria-live="polite" aria-relevant="all">
+                    <tr class="gradeA odd" ng-repeat="entry in usrProfileCtrl.userGrades | filter:searchText">
+                        <td class="sorting_1">{{entry.AssignmentId}}</td>
+                        <td class="">{{entry.AssignmentName}}</td>
+                        <td class="">{{entry.AssignmentTypeId | assignmentTypeFilter}}</td>
+                        <td class="">{{entry.DateAdded | date:'MM/dd/yyyy'}}</td>
+                        <td class="center">{{entry.PointsEarned}}</td>
+                        <td class="center">{{entry.TotalPoints}}</td>
+                        <td class="center"> {{entry.InstructorComments}}</td>
+                        <td class="center">
+                            <div class="buttonDivider"></div>
+                            <button class="btn-small btn-primary">Edit Entry</button>
+                            <div class="buttonDivider"></div>
+                            <button type="button" class="btn-small btn-danger" ng-click="usrProfileCtrl.deleteGradebookEntry(entry.GradebookEntryId)">Delete Entry</button>
+                            <div class="buttonDivider"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript"> 
+
+
+    </script>
+}

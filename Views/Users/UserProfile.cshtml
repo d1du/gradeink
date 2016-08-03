@@ -1,0 +1,366 @@
+﻿@model Derek.Web.Models.ViewModels.ItemViewModel<int?>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@Styles.Render("~/Content/own.css")
+
+
+<div data-ng-app="GradeInkApp" class="col-md-10 ng-cloak">
+    <div ng-controller="userProfileController as usrProfileCtrl">
+        <h1><i class="glyphicon glyphicon-user"></i> &nbsp User Profile</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="content-box-large">
+                    <div class="panel-heading">
+                        <div class="panel-title"> <b>{{usrProfileCtrl.userInfo.FirstName}} {{usrProfileCtrl.userInfo.LastName}} </b></div>
+                        <div class="panel-options">
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-5">
+                            <div class="img-thumbnail">
+                                <div class="uploadPhotoBox">
+                                    <img ng-src="http://www.vacul.org/extension/site/design/site//images/anonymous-user.png" style='width: auto; height: 175px;' />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div><font size="3"><b>Id: </b> &nbsp{{usrProfileCtrl.userInfo.Id}}</font></div>
+                            <br />
+                            <div><font size="3"><b>User Id: </b> &nbsp{{usrProfileCtrl.userInfo.UserId}}</font></div>
+                            <br />
+                            <div><font size="3"><b>User Type: </b> &nbsp{{usrProfileCtrl.userInfo.UserType | userTypeFilter}}</font></div>
+                            <br />
+                            <div><font size="3"><b>Period: </b> &nbsp{{usrProfileCtrl.userInfo.Period == 0? 'MISC.' : usrProfileCtrl.userInfo.Period}}</font></div>
+                            <br />
+                            <div><font size="3"><b>Email: </b> &nbsp{{usrProfileCtrl.userInfo.Email? usrProfileCtrl.userInfo.Email : "none"}}</font></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!---->
+
+            <div class="col-md-5">
+                <div class="row">
+                    <div class="col-md-12 panel-primary">
+                        <div class="content-box-header panel-heading">
+                            <div class="panel-title"><b>Student Performance </b></div>
+                            <div class="panel-options">
+                            </div>
+                        </div>
+                        <div class="content-box-large box-with-header">
+
+                            <p><b>Homework Percentage: &nbsp&nbsp {{usrProfileCtrl.HWPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.HWPointsEarned}}/{{usrProfileCtrl.HWTotalPoints}})</b></p>
+                            <p><b>Quiz Percentage: &nbsp&nbsp {{usrProfileCtrl.quizPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.quizPointsEarned}}/{{usrProfileCtrl.quizTotalPoints}})</b></p>
+
+                            <p><b>Test Percentage: &nbsp&nbsp {{usrProfileCtrl.testPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.testPointsEarned}}/{{usrProfileCtrl.testTotalPoints}})</b> </p>
+                            <p><b>Overall Percentage: &nbsp&nbsp {{usrProfileCtrl.overallPercentage*100 | number}}% &nbsp&nbsp({{usrProfileCtrl.overallPointsEarned}}/{{usrProfileCtrl.overallTotalPoints}})</b> </p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="content-box-header panel-heading">
+                            <div class="panel-title"><b>Filter Assignments Through Keywords </b></div>
+                            <div class="panel-options">
+                            </div>
+                        </div>
+                        <div class="content-box-large box-with-header">
+                            <input type="text" id="filterAssignments" class="form-control" ng-model="searchText" placeholder="A Tale of Two Cities" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!---->
+        <div class="row">
+            <div class="col-md-11 panel-success">
+                <div class="content-box-header panel-heading">
+                    <div class="panel-title"><b>Gradebook for {{usrProfileCtrl.userInfo.FirstName}} {{usrProfileCtrl.userInfo.LastName}}</b></div>
+                    <div class="panel-options">
+                    </div>
+                </div>
+                <div class="content-box-large box-with-header">
+                    <!---->
+
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered dataTable" id="userGradeTable" aria-describedby="example_info">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending" style="width: 100px;">
+                                    <font size="2">Assignment #</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 260px;">
+                                    <font size="2">Assignment Name</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 100px;">
+                                    <font size="2">Type</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 100px;">
+                                    <font size="2">Date Added</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 60px;">
+                                    <font size="2">Score</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 60px;">
+                                    <font size="2">Total</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="CSS grade: activate to sort column ascending" style="width: 260px;">
+                                    <font size="2">Instructor Comments</font>
+                                </th>
+                                <th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 203px;">
+                                    <font size="2">Modify</font>
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody role="alert" aria-live="polite" aria-relevant="all">
+                            <tr class="gradeA odd" ng-repeat="entry in usrProfileCtrl.userGrades | filter:searchText">
+                                <td class="sorting_1">{{entry.AssignmentId}}</td>
+                                <td class="">{{entry.AssignmentName}}</td>
+                                <td class="">{{entry.AssignmentTypeId | assignmentTypeFilter}}</td>
+                                <td class="">{{entry.DateAdded | date:'MM/dd/yyyy'}}</td>
+                                <td class="center">{{entry.PointsEarned}}</td>
+                                <td class="center">{{entry.TotalPoints}}</td>
+                                <td class="center"> {{entry.InstructorComments}}</td>
+                                <td class="center">
+                                    <div class="buttonDivider"></div>
+                                    <button class="btn-small btn-primary">Edit Entry</button>
+                                    <div class="buttonDivider"></div>
+                                    <button type="button" class="btn-small btn-danger" ng-click="usrProfileCtrl.deleteGradebookEntry(entry.GradebookEntryId)">Delete Entry</button>
+                                    <div class="buttonDivider"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @*<script src="~/Scripts/core/base.controller.js"></script>
+        <script src="~/Scripts/core/base.service.js"></script>*@
+    <script src="~/Scripts/services.users.js">        //the service object is in here</script>
+    <script src="~/Scripts/services.gradebook.js"></script>
+    <script type="text/javascript">
+        var APPNAME = 'GradeInkApp';
+
+        var myApp = angular.module(APPNAME, []);
+
+        myApp.controller('userProfileController', ['$scope', function ($scope) {
+
+            var vm = this;
+            vm.$scope = $scope;
+            vm.userInfo = null;
+            vm.user = {};
+            vm.userGrades = null;
+            vm.HWPointsEarned = null;
+            vm.HWTotalPoints = null;
+            vm.HWPercentage = null;
+            vm.quizPointsEarned = null;
+            vm.quizPointsTotal = null;
+            vm.quizPercentage = null;
+            vm.testPointsEarned = null;
+            vm.testPointsTotal = null;
+            vm.testPercentage = null;
+            vm.overallEarnedPoints = null;
+            vm.overallTotalPoints = null;
+            vm.overallPercentage = null;
+
+            vm.onGetUserByIdSuccess = _onGetUserByIdSuccess;
+            vm.onGetUserByIdError = _onGetUserByIdError;
+            vm.onGetGradesSuccess = _onGetGradesSuccess;
+            vm.onGetGradesError = _onGetGradesError;
+            vm.deleteGradebookEntry = _deleteGradebookEntry;
+            vm.onDeleteSuccess = _onDeleteSuccess;
+            vm.onDeleteError = _onDeleteError;
+            vm.getUserById = _getUserById;
+            vm.getUserHWPercentage = _getUserHWPercentage;
+            vm.onGetUserHWPercentageSuccess = _onGetUserHWPercentageSuccess;
+            vm.onGetUserHWPercentageError = _onGetUserHWPercentageError;
+            vm.getUserQuizPercentage = _getUserQuizPercentage;
+            vm.onGetUserQuizPercentageSuccess = _onGetUserQuizPercentageSuccess;
+            vm.onGetUserQuizPercentageError = _onGetUserQuizPercentageError;
+            vm.getUserTestPercentage = _getUserTestPercentage;
+            vm.onGetUserTestPercentageSuccess = _onGetUserTestPercentageSuccess;
+            vm.onGetUserTestPercentageError = _onGetUserTestPercentageError;
+            vm.getUserOverallPercentage = _getUserOverallPercentage;
+            vm.onGetUserOverallPercentageSuccess = _onGetUserOverallPercentageSuccess;
+            vm.onGetUserOverallPercentageError = _onGetUserOverallPercentageError;
+
+
+
+
+            //on render
+            render();
+
+
+            function render() {
+                vm.getUserById(@Model.Item);
+            }
+
+            function _getUserById(id) {
+                if (id != null) {
+                    services.users.getUserById(id, vm.onGetUserByIdSuccess, vm.onGetUserByIdError);
+                }
+            }
+
+            function _onGetUserByIdSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.userInfo = data.Item;
+                    vm.user.userId = data.Item.UserId;
+                });
+
+                vm.getUserHWPercentage(vm.user.userId);
+                vm.getUserQuizPercentage(vm.user.userId);
+                vm.getUserTestPercentage(vm.user.userId);
+                vm.getUserOverallPercentage(vm.user.userId);
+                services.gradebook.getUserGradesByUserId(vm.user, vm.onGetGradesSuccess, vm.onGetGradesSuccess);
+                console.log(data);
+            }
+
+            function _onGetUserByIdError() {
+                console.log("error when getting user info by Id.");
+            }
+
+            function _onGetGradesSuccess(data) {
+                vm.$scope.$apply(vm.userGrades = data.Items);
+                console.log(data);
+            }
+
+            function _onGetGradesError() {
+                console.log("Error when trying to get student's grades.");
+            }
+
+            function _deleteGradebookEntry(id) {
+                if (confirm('Are you sure you want to delete assignment entry ' + id + ' ?')) {
+                    services.gradebook.deleteGradebookEntry(id, vm.onDeleteSuccess, vm.onDeleteError);
+                }
+                else {
+                    return;
+                }
+            }
+
+            function _onDeleteSuccess() {
+                services.gradebook.getUserGradesByUserId(vm.user, vm.onGetGradesSuccess, vm.onGetGradesError);
+                console.log("gradebook entry deleted.");
+            }
+
+            function _onDeleteError() {
+                console.log("could not delete gradebook entry.");
+            }
+
+            function _getUserHWPercentage(userId) {
+                services.gradebook.getUserHWPercentage(userId, vm.onGetUserHWPercentageSuccess, vm.onGetUserHWPercentageError)
+            }
+
+            function _onGetUserHWPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.HWPointsEarned = data.Item.PointsEarned;
+                    vm.HWTotalPoints = data.Item.TotalPoints;
+                    vm.HWPercentage = data.Item.Percentage;
+                });
+            }
+
+            function _onGetUserHWPercentageError() {
+                console.log("Error when getting hw scores.");
+            }
+
+            function _getUserQuizPercentage(userId) {
+                services.gradebook.getUserQuizPercentage(userId, vm.onGetUserQuizPercentageSuccess, vm.onGetUserQuizPercentageError)
+            }
+
+            function _onGetUserQuizPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.quizPointsEarned = data.Item.PointsEarned;
+                    vm.quizTotalPoints = data.Item.TotalPoints;
+                    vm.quizPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserQuizPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+            function _getUserTestPercentage(userId) {
+                services.gradebook.getUserTestPercentage(userId, vm.onGetUserTestPercentageSuccess, vm.onGetUserTestPercentageError)
+            }
+
+            function _onGetUserTestPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.testPointsEarned = data.Item.PointsEarned;
+                    vm.testTotalPoints = data.Item.TotalPoints;
+                    vm.testPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserTestPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+            function _getUserOverallPercentage(userId) {
+                services.gradebook.getUserOverallPercentage(userId, vm.onGetUserOverallPercentageSuccess, vm.onGetUserOverallPercentageError)
+            }
+
+            function _onGetUserOverallPercentageSuccess(data) {
+                vm.$scope.$apply(function () {
+                    vm.overallPointsEarned = data.Item.PointsEarned;
+                    vm.overallTotalPoints = data.Item.TotalPoints;
+                    vm.overallPercentage = data.Item.Percentage;
+                });
+
+            }
+
+            function _onGetUserOverallPercentageError() {
+                console.log("Error when getting quiz scores.");
+            }
+
+
+        }]);
+
+        myApp.filter('assignmentTypeFilter', [function () {
+            return function (assignmentTypeId) {
+                switch (assignmentTypeId) {
+                    case 1:
+                        return "Homework";
+                    case 2:
+                        return "Quiz";
+                    case 3:
+                        return "Test";
+                    case 4:
+                        return "Project";
+                    case 5:
+                        return "Extra Credit";
+                }
+            }
+        }])
+
+        myApp.filter('userTypeFilter', [function () {
+            return function (userTypeId) {
+                switch (userTypeId) {
+                    case 1:
+                        return "Master Admin";
+                    case 2:
+                        return "Admin";
+                    case 3:
+                        return "Student";
+                    case 4:
+                        return "TA"
+                }
+            }
+        }])
+
+    </script>
+}
